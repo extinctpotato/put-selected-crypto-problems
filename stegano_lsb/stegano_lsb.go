@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"image"
 	_ "image/png"
+	"math/bits"
 	"os"
+	"strconv"
 )
 
 type SteganoLsb struct {
@@ -38,7 +40,18 @@ func (s SteganoLsb) PrintColors() {
 		for y := 0; y < h; y++ {
 			color := s.OriginalImage.At(x, y)
 			r, g, b, _ := color.RGBA()
-			fmt.Printf("[%d][%d]: %d, %d, %d\n", x, y, r, g, b)
+			fmt.Printf("[%d][%d]: %d[%d], %d[%d], %d[%d]\n",
+				x, y, r, bits.Len32(r), g, bits.Len32(g), b, bits.Len32(b))
+
+			rLSB := r
+			rLSB |= (uint32(1) << 0)
+
+			rB, gB, bB, rLSBB := strconv.FormatUint(uint64(r), 2),
+				strconv.FormatUint(uint64(g), 2),
+				strconv.FormatUint(uint64(b), 2),
+				strconv.FormatUint(uint64(rLSB), 2)
+
+			fmt.Printf("\t%s, %s, %s, %s\n", rB, rLSBB, gB, bB)
 		}
 	}
 }
