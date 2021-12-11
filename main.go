@@ -19,4 +19,9 @@ func main() {
 	fmt.Printf("%s\n", s.OriginalImageFmt)
 
 	s.PrintColors()
+	fmt.Scanln()
+	s.Encode("test")
+
+	rgbMaskTest := stegano.StringToRgbMask("cool")
+	fmt.Printf("%d\n", rgbMaskTest)
 }
