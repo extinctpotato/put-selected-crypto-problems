@@ -45,16 +45,13 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 
 			oldCol := img.At(y, x).(color.RGBA)
 
-			fmt.Printf("[%d][%d] %d: %d, %d, %d\n",
-				x, y, flatIndex, oldCol.R, oldCol.G, oldCol.B)
-
 			if flatIndex < len(msgMask) {
-				r2, g2, b2 := ChangeLsbUint8(oldCol.R, msgMask[flatIndex][0]),
+				newColor := color.RGBA{
+					ChangeLsbUint8(oldCol.R, msgMask[flatIndex][0]),
 					ChangeLsbUint8(oldCol.G, msgMask[flatIndex][1]),
-					ChangeLsbUint8(oldCol.B, msgMask[flatIndex][2])
-				newColor := color.RGBA{r2, g2, b2, 255}
-				fmt.Printf("!!![%d][%d] %d: %d, %d, %d | %d\n",
-					x, y, flatIndex, r2, g2, b2, msgMask[flatIndex])
+					ChangeLsbUint8(oldCol.B, msgMask[flatIndex][2]),
+					255,
+				}
 
 				img.Set(y, x, newColor)
 			}
