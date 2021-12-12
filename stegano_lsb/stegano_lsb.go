@@ -94,6 +94,9 @@ func stringToCharArray(s string) []int {
 		result = append(result, int(bytes[i]))
 	}
 
+	// Terminate the string with NUL.
+	result = append(result, 0)
+
 	return result
 }
 

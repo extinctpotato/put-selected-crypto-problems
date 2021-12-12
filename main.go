@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"image/png"
+	"os"
 
 	stegano "github.com/extinctpotato/put-selected-crypto-problems-lab/stegano_lsb"
 )
@@ -18,8 +20,14 @@ func main() {
 
 	fmt.Printf("%s\n", s.OriginalImageFmt)
 
-	s.Encode("test")
+	enc, _ := s.Encode("test")
 
-	rgbMaskTest := stegano.StringToRgbMask("cool")
-	fmt.Printf("%d\n", rgbMaskTest)
+	encodedFile, err := os.Create("misc/stairs_encoded.png")
+	defer encodedFile.Close()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	png.Encode(encodedFile, enc)
 }
