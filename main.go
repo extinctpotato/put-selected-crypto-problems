@@ -12,10 +12,11 @@ func main() {
 	fmt.Println("Hello world!")
 
 	s := stegano.SteganoLsb{}
-	err := s.LoadFromFile("misc/stairs_500_500.png")
+	err := s.LoadFromFile("misc/stairs_32_32.png")
 
 	if err != nil {
 		fmt.Printf("err: %s", err)
+		return
 	}
 
 	fmt.Printf("%s\n", s.OriginalImageFmt)
@@ -27,7 +28,19 @@ func main() {
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	png.Encode(encodedFile, enc)
+
+	s2 := stegano.SteganoLsb{}
+	err = s2.LoadFromFile("misc/stairs_encoded.png")
+
+	if err != nil {
+		fmt.Printf("err: %s", err)
+	}
+
+	dec := s2.Decode()
+
+	fmt.Printf("|%s|\n", dec)
 }

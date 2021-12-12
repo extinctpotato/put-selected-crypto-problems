@@ -34,7 +34,7 @@ func (s *SteganoLsb) LoadFromFile(path string) error {
 }
 
 func (s SteganoLsb) Encode(msg string) (image.Image, error) {
-	img := cloneToRGBA(s.OriginalImage)
+	img := cloneToNRGBA(s.OriginalImage)
 	imgBounds := img.Bounds()
 
 	msgMask := StringToRgbMask(msg)
@@ -45,7 +45,7 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			flatIndex := x*imgBounds.Max.X + y
 
-			oldCol := img.At(x, y).(color.RGBA)
+			oldCol := img.At(x, y).(color.NRGBA)
 
 			fmt.Printf("[%d][%d] %d: %d, %d, %d\n",
 				x, y, flatIndex, oldCol.R, oldCol.G, oldCol.B)
@@ -54,7 +54,7 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 				r2, g2, b2 := ChangeLsbUint8(oldCol.R, msgMask[flatIndex][0]),
 					ChangeLsbUint8(oldCol.B, msgMask[flatIndex][1]),
 					ChangeLsbUint8(oldCol.G, msgMask[flatIndex][2])
-				newColor := color.RGBA{r2, g2, b2, 1}
+				newColor := color.NRGBA{r2, g2, b2, 255}
 
 				img.Set(x, y, newColor)
 			}
@@ -62,6 +62,48 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 	}
 
 	return img, nil
+}
+
+func (s SteganoLsb) Decode() string {
+	img := cloneToNRGBA(s.OriginalImage)
+	imgBounds := s.OriginalImage.Bounds()
+
+	var tmpBin string
+	var tmpCounter int
+
+	var asciiChars []byte
+
+	for x := 0; x < imgBounds.Max.X; x++ {
+		for y := 0; y < imgBounds.Max.Y; y++ {
+			col := img.At(x, y).(color.NRGBA)
+			tmpCounter += 3
+
+			// Extract LSB from the RGB component.
+			if tmpCounter < 9 {
+				tmpBin += strconv.Itoa(int(col.R % 2))
+				tmpBin += strconv.Itoa(int(col.G % 2))
+				tmpBin += strconv.Itoa(int(col.B % 2))
+			} else if tmpCounter == 9 {
+				tmpBin += strconv.Itoa(int(col.R % 2))
+				tmpBin += strconv.Itoa(int(col.G % 2))
+
+				tmpChar, _ := strconv.ParseUint(tmpBin, 2, 8)
+
+				fmt.Println(tmpBin)
+
+				if tmpChar == 0 {
+					return string(asciiChars)
+				}
+
+				asciiChars = append(asciiChars, uint8(tmpChar))
+
+				tmpCounter = 0
+				tmpBin = ""
+			}
+		}
+	}
+
+	return string(asciiChars)
 }
 
 func StringToRgbMask(s string) [][]int {
@@ -100,9 +142,9 @@ func stringToCharArray(s string) []int {
 	return result
 }
 
-func cloneToRGBA(src image.Image) *image.RGBA {
+func cloneToNRGBA(src image.Image) *image.NRGBA {
 	b := src.Bounds()
-	dst := image.NewRGBA(b)
+	dst := image.NewNRGBA(b)
 	draw.Draw(dst, b, src, b.Min, draw.Src)
 
 	return dst
