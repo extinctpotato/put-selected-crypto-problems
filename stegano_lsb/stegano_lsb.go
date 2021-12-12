@@ -34,7 +34,7 @@ func (s *SteganoLsb) LoadFromFile(path string) error {
 }
 
 func (s SteganoLsb) Encode(msg string) (image.Image, error) {
-	img := cloneToNRGBA(s.OriginalImage)
+	img := cloneToRGBA(s.OriginalImage)
 	imgBounds := img.Bounds()
 
 	msgMask := StringToRgbMask(msg)
@@ -45,7 +45,7 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			flatIndex := x*imgBounds.Max.X + y
 
-			oldCol := img.At(x, y).(color.NRGBA)
+			oldCol := img.At(x, y).(color.RGBA)
 
 			fmt.Printf("[%d][%d] %d: %d, %d, %d\n",
 				x, y, flatIndex, oldCol.R, oldCol.G, oldCol.B)
@@ -65,7 +65,7 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 }
 
 func (s SteganoLsb) Decode() string {
-	img := cloneToNRGBA(s.OriginalImage)
+	img := cloneToRGBA(s.OriginalImage)
 	imgBounds := s.OriginalImage.Bounds()
 
 	var tmpBin string
@@ -75,7 +75,7 @@ func (s SteganoLsb) Decode() string {
 
 	for x := 0; x < imgBounds.Max.X; x++ {
 		for y := 0; y < imgBounds.Max.Y; y++ {
-			col := img.At(x, y).(color.NRGBA)
+			col := img.At(x, y).(color.RGBA)
 			tmpCounter += 3
 
 			// Extract LSB from the RGB component.
@@ -142,9 +142,9 @@ func stringToCharArray(s string) []int {
 	return result
 }
 
-func cloneToNRGBA(src image.Image) *image.NRGBA {
+func cloneToRGBA(src image.Image) *image.RGBA {
 	b := src.Bounds()
-	dst := image.NewNRGBA(b)
+	dst := image.NewRGBA(b)
 	draw.Draw(dst, b, src, b.Min, draw.Src)
 
 	return dst
