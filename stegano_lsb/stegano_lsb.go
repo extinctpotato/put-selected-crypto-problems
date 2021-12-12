@@ -120,9 +120,9 @@ func StringToRgbMask(s string) [][]int {
 			resultIdx := i/3 + charIdx*3
 			result[resultIdx] = make([]int, 3)
 
-			result[resultIdx][0], _ = strconv.Atoi(string(binRepr[i]))
-			result[resultIdx][1], _ = strconv.Atoi(string(binRepr[i+1]))
-			result[resultIdx][2], _ = strconv.Atoi(string(binRepr[i+2]))
+			for j := 0; j < 3; j += 1 {
+				result[resultIdx][j], _ = strconv.Atoi(string(binRepr[i+j]))
+			}
 		}
 	}
 
