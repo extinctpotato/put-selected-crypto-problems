@@ -3,6 +3,7 @@ package stegano_lsb
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	_ "image/png"
 	"math/bits"
@@ -60,18 +61,26 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 	img := cloneToRGBA(s.OriginalImage)
 	imgBounds := img.Bounds()
 
-	msgAscii := stringToCharArray(msg)
+	msgMask := StringToRgbMask(msg)
 
-	fmt.Printf("%d\n", msgAscii)
+	fmt.Printf("%d\n", msgMask)
 
 	for x := 0; x < imgBounds.Max.X; x++ {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			flatIndex := x*imgBounds.Max.X + y
 
-			color := img.At(x, y)
-			r, g, b, _ := color.RGBA()
+			oldColor := img.At(x, y)
+			r, g, b, _ := oldColor.RGBA()
 			fmt.Printf("[%d][%d] %d: %d, %d, %d\n",
 				x, y, flatIndex, r, g, b)
+
+			r2, g2, b2 := ChangeLsbUint32(r, msgMask[flatIndex][0]),
+				ChangeLsbUint32(r, msgMask[flatIndex][1]),
+				ChangeLsbUint32(r, msgMask[flatIndex][2])
+
+			newColor := color.RGBA{r2, g2, b2, 1}
+
+			img.Set(x, y, newColor)
 		}
 	}
 
@@ -117,6 +126,14 @@ func cloneToRGBA(src image.Image) *image.RGBA {
 	draw.Draw(dst, b, src, b.Min, draw.Src)
 
 	return dst
+}
+
+func ChangeLsbUint32(n uint32, zeroOrOne int) uint32 {
+	if zeroOrOne == 0 {
+		return clearBitUint32(n, 0)
+	} else {
+		return setBitUint32(n, 0)
+	}
 }
 
 // Shamelessly stolen from Kevin Burke:
