@@ -39,8 +39,6 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 
 	msgMask := StringToRgbMask(msg)
 
-	fmt.Printf("%d\n", msgMask)
-
 	for x := 0; x < imgBounds.Max.X; x++ {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			flatIndex := x*imgBounds.Max.X + y
@@ -52,9 +50,11 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 
 			if flatIndex < len(msgMask) {
 				r2, g2, b2 := ChangeLsbUint8(oldCol.R, msgMask[flatIndex][0]),
-					ChangeLsbUint8(oldCol.B, msgMask[flatIndex][1]),
-					ChangeLsbUint8(oldCol.G, msgMask[flatIndex][2])
-				newColor := color.NRGBA{r2, g2, b2, 255}
+					ChangeLsbUint8(oldCol.G, msgMask[flatIndex][1]),
+					ChangeLsbUint8(oldCol.B, msgMask[flatIndex][2])
+				newColor := color.RGBA{r2, g2, b2, 255}
+				fmt.Printf("!!![%d][%d] %d: %d, %d, %d | %d\n",
+					x, y, flatIndex, r2, g2, b2, msgMask[flatIndex])
 
 				img.Set(y, x, newColor)
 			}
@@ -151,22 +151,11 @@ func cloneToRGBA(src image.Image) *image.RGBA {
 }
 
 func ChangeLsbUint8(n uint8, zeroOrOne int) uint8 {
-	if zeroOrOne == 0 {
-		return clearBitUint8(n, 0)
+	if n%2 == 1 && zeroOrOne == 0 {
+		return n - 1
+	} else if n%2 == 0 && zeroOrOne == 1 {
+		return n + 1
 	} else {
-		return setBitUint8(n, 0)
+		return n
 	}
-}
-
-// Shamelessly stolen from Kevin Burke:
-// https://stackoverflow.com/a/23192263
-func setBitUint8(n uint8, pos uint) uint8 {
-	n |= (uint8(1) << pos)
-	return n
-}
-
-func clearBitUint8(n uint8, pos uint) uint8 {
-	mask := ^(uint8(1) << pos)
-	n &= mask
-	return n
 }
