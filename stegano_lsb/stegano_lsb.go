@@ -45,7 +45,7 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			flatIndex := x*imgBounds.Max.X + y
 
-			oldCol := img.At(x, y).(color.RGBA)
+			oldCol := img.At(y, x).(color.RGBA)
 
 			fmt.Printf("[%d][%d] %d: %d, %d, %d\n",
 				x, y, flatIndex, oldCol.R, oldCol.G, oldCol.B)
@@ -56,7 +56,7 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 					ChangeLsbUint8(oldCol.G, msgMask[flatIndex][2])
 				newColor := color.NRGBA{r2, g2, b2, 255}
 
-				img.Set(x, y, newColor)
+				img.Set(y, x, newColor)
 			}
 		}
 	}
@@ -75,7 +75,7 @@ func (s SteganoLsb) Decode() string {
 
 	for x := 0; x < imgBounds.Max.X; x++ {
 		for y := 0; y < imgBounds.Max.Y; y++ {
-			col := img.At(x, y).(color.RGBA)
+			col := img.At(y, x).(color.RGBA)
 			tmpCounter += 3
 
 			// Extract LSB from the RGB component.
