@@ -41,6 +41,7 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 
 	for x := 0; x < imgBounds.Max.X; x++ {
 		for y := 0; y < imgBounds.Max.Y; y++ {
+			// Index of contiguous values row by row.
 			flatIndex := x*imgBounds.Max.X + y
 
 			oldCol := img.At(y, x).(color.RGBA)
@@ -73,27 +74,30 @@ func (s SteganoLsb) Decode() string {
 	for x := 0; x < imgBounds.Max.X; x++ {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			col := img.At(y, x).(color.RGBA)
-			tmpCounter += 3
 
-			// Extract LSB from the RGB component.
-			if tmpCounter < 9 {
+			tmpCounter++
+
+			// One character is encoded in three pixels so we require three iterations
+			// to extract the LSB and reconstruct the character.
+			if tmpCounter < 3 {
 				tmpBin += strconv.Itoa(int(col.R % 2))
 				tmpBin += strconv.Itoa(int(col.G % 2))
 				tmpBin += strconv.Itoa(int(col.B % 2))
-			} else if tmpCounter == 9 {
+			} else if tmpCounter == 3 {
+				// Last pixel contains two remaining bytes and a zero which is discarded.
 				tmpBin += strconv.Itoa(int(col.R % 2))
 				tmpBin += strconv.Itoa(int(col.G % 2))
 
 				tmpChar, _ := strconv.ParseUint(tmpBin, 2, 8)
 
-				fmt.Println(tmpBin)
-
+				// Eight zeros in tmpBin represent the NUL terminator.
 				if tmpChar == 0 {
 					return string(asciiChars)
 				}
 
 				asciiChars = append(asciiChars, uint8(tmpChar))
 
+				// Reset the counter and the string holding the padded-binary-as-string.
 				tmpCounter = 0
 				tmpBin = ""
 			}
@@ -129,6 +133,7 @@ func stringToCharArray(s string) []int {
 	bytes := []byte(s)
 	var result []int
 
+	// Convert the ASCII character to an explicit integer.
 	for i := 0; i < len(bytes); i++ {
 		result = append(result, int(bytes[i]))
 	}
