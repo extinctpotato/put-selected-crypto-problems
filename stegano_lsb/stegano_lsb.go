@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"image/draw"
 	_ "image/png"
-	"math/bits"
 	"os"
 	"strconv"
 )
@@ -34,29 +33,6 @@ func (s *SteganoLsb) LoadFromFile(path string) error {
 	return nil
 }
 
-func (s SteganoLsb) PrintColors() {
-	bounds := s.OriginalImage.Bounds()
-	w, h := bounds.Max.X, bounds.Max.Y
-
-	for x := 0; x < w; x++ {
-		for y := 0; y < h; y++ {
-			color := s.OriginalImage.At(x, y)
-			r, g, b, _ := color.RGBA()
-			fmt.Printf("[%d][%d]: %d[%d], %d[%d], %d[%d]\n",
-				x, y, r, bits.Len32(r), g, bits.Len32(g), b, bits.Len32(b))
-
-			rLSB := setBitUint32(r, 0)
-
-			rB, gB, bB, rLSBB := strconv.FormatUint(uint64(r), 2),
-				strconv.FormatUint(uint64(g), 2),
-				strconv.FormatUint(uint64(b), 2),
-				strconv.FormatUint(uint64(rLSB), 2)
-
-			fmt.Printf("\t%s, %s, %s, %s\n", rB, rLSBB, gB, bB)
-		}
-	}
-}
-
 func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 	img := cloneToRGBA(s.OriginalImage)
 	imgBounds := img.Bounds()
@@ -69,18 +45,19 @@ func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			flatIndex := x*imgBounds.Max.X + y
 
-			oldColor := img.At(x, y)
-			r, g, b, _ := oldColor.RGBA()
+			oldCol := img.At(x, y).(color.RGBA)
+
 			fmt.Printf("[%d][%d] %d: %d, %d, %d\n",
-				x, y, flatIndex, r, g, b)
+				x, y, flatIndex, oldCol.R, oldCol.G, oldCol.B)
 
-			r2, g2, b2 := ChangeLsbUint32(r, msgMask[flatIndex][0]),
-				ChangeLsbUint32(r, msgMask[flatIndex][1]),
-				ChangeLsbUint32(r, msgMask[flatIndex][2])
+			if flatIndex < len(msgMask) {
+				r2, g2, b2 := ChangeLsbUint8(oldCol.R, msgMask[flatIndex][0]),
+					ChangeLsbUint8(oldCol.B, msgMask[flatIndex][1]),
+					ChangeLsbUint8(oldCol.G, msgMask[flatIndex][2])
+				newColor := color.RGBA{r2, g2, b2, 1}
 
-			newColor := color.RGBA{r2, g2, b2, 1}
-
-			img.Set(x, y, newColor)
+				img.Set(x, y, newColor)
+			}
 		}
 	}
 
@@ -128,23 +105,23 @@ func cloneToRGBA(src image.Image) *image.RGBA {
 	return dst
 }
 
-func ChangeLsbUint32(n uint32, zeroOrOne int) uint32 {
+func ChangeLsbUint8(n uint8, zeroOrOne int) uint8 {
 	if zeroOrOne == 0 {
-		return clearBitUint32(n, 0)
+		return clearBitUint8(n, 0)
 	} else {
-		return setBitUint32(n, 0)
+		return setBitUint8(n, 0)
 	}
 }
 
 // Shamelessly stolen from Kevin Burke:
 // https://stackoverflow.com/a/23192263
-func setBitUint32(n uint32, pos uint) uint32 {
-	n |= (uint32(1) << pos)
+func setBitUint8(n uint8, pos uint) uint8 {
+	n |= (uint8(1) << pos)
 	return n
 }
 
-func clearBitUint32(n uint32, pos uint) uint32 {
-	mask := ^(uint32(1) << pos)
+func clearBitUint8(n uint8, pos uint) uint8 {
+	mask := ^(uint8(1) << pos)
 	n &= mask
 	return n
 }
