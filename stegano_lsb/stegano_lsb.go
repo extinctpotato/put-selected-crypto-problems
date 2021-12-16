@@ -1,6 +1,7 @@
 package stegano_lsb
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -36,6 +37,10 @@ func (s *SteganoLsb) LoadFromFile(path string) error {
 func (s SteganoLsb) Encode(msg string) (image.Image, error) {
 	img := cloneToRGBA(s.OriginalImage)
 	imgBounds := img.Bounds()
+
+	if len(msg) > (imgBounds.Max.X*imgBounds.Max.Y)/3 {
+		return nil, errors.New("not enough pixels to store the value")
+	}
 
 	msgMask := StringToRgbMask(msg)
 
