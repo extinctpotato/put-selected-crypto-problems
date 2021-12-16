@@ -21,7 +21,7 @@ func main() {
 
 	fmt.Printf("%s\n", s.OriginalImageFmt)
 
-	enc, _ := s.Encode("test")
+	enc, _ := s.Encode("this is a very sophisticated string which is rather long and has a lot of characters")
 
 	encodedFile, err := os.Create("misc/stairs_encoded.png")
 	defer encodedFile.Close()
