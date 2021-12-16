@@ -6,7 +6,7 @@ import (
 	"image/png"
 	"os"
 
-	"github.com/extinctpotato/put-selected-crypto-problems-lab/stegano_lsb"
+	"github.com/extinctpotato/put-selected-crypto-problems-lab/pkg/stegano_lsb"
 )
 
 func main() {
