@@ -57,16 +57,35 @@ func (v *VisEnc) LoadFromFile(path string) error {
 	return nil
 }
 
+//func (v *VisEnc) Encode() {
+//	inputImageBoundaries := v.InputImage.Bounds()
+//}
+
 func (v *VisEnc) Print() {
 	imgBounds := v.InputImage.Bounds()
 
 	fmt.Println("bounds:", imgBounds)
 
+	var blacks, whites int
+
 	for x := 0; x < imgBounds.Max.X; x++ {
 		for y := 0; y < imgBounds.Max.Y; y++ {
-			colorValue := v.InputImage.At(y, x).(color.Gray)
+			colorValue := v.InputImage.At(x, y).(color.Gray)
 
-			fmt.Printf("[%d][%d]: [%d]\n", x, y, colorValue.Y)
+			var colorStr string
+
+			if colorValue.Y == WHITE {
+				colorStr = "white"
+				whites++
+			} else {
+				colorStr = "black"
+				blacks++
+			}
+
+			fmt.Printf("x: %d, y: %d: %s\n", x, y, colorStr)
 		}
 	}
+
+	fmt.Println("blacks:", blacks)
+	fmt.Println("whites:", whites)
 }
