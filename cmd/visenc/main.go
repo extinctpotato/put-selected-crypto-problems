@@ -10,7 +10,6 @@ import (
 
 func main() {
 	v := visenc.VisEnc{}
-	fmt.Println("vim-go")
 
 	// Parse command-line parameters.
 	inputFilePath := flag.String("in", "", "input image file")
@@ -27,4 +26,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "couldn't open %s: %s", *inputFilePath, err)
 		os.Exit(1)
 	}
+
+	v.Print()
 }
