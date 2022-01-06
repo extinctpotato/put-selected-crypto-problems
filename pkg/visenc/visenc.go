@@ -9,6 +9,11 @@ import (
 	"os"
 )
 
+const (
+	WHITE = 255
+	BLACK = 0
+)
+
 type VisEnc struct {
 	InputImage image.Image
 }
@@ -39,9 +44,9 @@ func (v *VisEnc) LoadFromFile(path string) error {
 		for y := 0; y < imgBounds.Max.Y; y++ {
 			colorValue := inputImage.At(y, x).(color.Gray)
 
-			if colorValue.Y > 0 && colorValue.Y != 255 {
-				return fmt.Errorf("value %d not between 0 and 255",
-					colorValue.Y,
+			if colorValue.Y > BLACK && colorValue.Y != WHITE {
+				return fmt.Errorf("value %d not between %d and %d",
+					colorValue.Y, BLACK, WHITE,
 				)
 			}
 		}
