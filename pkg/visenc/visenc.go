@@ -15,7 +15,9 @@ const (
 )
 
 type VisEnc struct {
-	InputImage image.Image
+	InputImage     image.Image
+	InputImageDimX int
+	InputImageDimY int
 }
 
 func (v *VisEnc) LoadFromFile(path string) error {
@@ -39,9 +41,10 @@ func (v *VisEnc) LoadFromFile(path string) error {
 
 	// Check if only 0 and 255 values are present.
 	imgBounds := inputImage.Bounds()
+	v.InputImageDimX, v.InputImageDimY = imgBounds.Max.X, imgBounds.Max.Y
 
-	for x := 0; x < imgBounds.Max.X; x++ {
-		for y := 0; y < imgBounds.Max.Y; y++ {
+	for x := 0; x < v.InputImageDimX; x++ {
+		for y := 0; y < v.InputImageDimY; y++ {
 			colorValue := inputImage.At(y, x).(color.Gray)
 
 			if colorValue.Y > BLACK && colorValue.Y != WHITE {
@@ -62,14 +65,10 @@ func (v *VisEnc) LoadFromFile(path string) error {
 //}
 
 func (v *VisEnc) Print() {
-	imgBounds := v.InputImage.Bounds()
-
-	fmt.Println("bounds:", imgBounds)
-
 	var blacks, whites int
 
-	for x := 0; x < imgBounds.Max.X; x++ {
-		for y := 0; y < imgBounds.Max.Y; y++ {
+	for x := 0; x < v.InputImageDimX; x++ {
+		for y := 0; y < v.InputImageDimY; y++ {
 			colorValue := v.InputImage.At(x, y).(color.Gray)
 
 			var colorStr string
