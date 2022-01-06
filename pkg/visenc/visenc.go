@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"math/rand"
 	"os"
 )
 
@@ -60,11 +61,70 @@ func (v *VisEnc) LoadFromFile(path string) error {
 	return nil
 }
 
-//func (v *VisEnc) Encode() {
-//	inputImageBoundaries := v.InputImage.Bounds()
-//}
+func (v *VisEnc) Encode() []*image.Gray {
+	shareImageBoundaries := image.Rectangle{
+		image.Point{0, 0},
+		image.Point{v.InputImageDimX * 2, v.InputImageDimY},
+	}
+
+	shares := []*image.Gray{
+		image.NewGray(shareImageBoundaries),
+		image.NewGray(shareImageBoundaries),
+	}
+
+	_ = shares
+
+	fmt.Println("shareImageBoundaries:", shareImageBoundaries)
+
+	for x := 0; x < v.InputImageDimX; x++ {
+		for y := 0; y < v.InputImageDimY; y++ {
+			colorValue := v.InputImage.At(x, y).(color.Gray)
+			_ = colorValue
+
+			randValue := rand.Float64()
+
+			fmt.Printf("randValue: %f\n", randValue)
+
+			switch colorValue.Y {
+			case WHITE:
+				fmt.Println("white!")
+				if randValue > 0.5 {
+					shares[0].Set(x*2, y, color.Gray{WHITE})
+					shares[0].Set(x*2+1, y, color.Gray{BLACK})
+					shares[1].Set(x*2, y, color.Gray{WHITE})
+					shares[1].Set(x*2+1, y, color.Gray{BLACK})
+				} else {
+					shares[0].Set(x*2, y, color.Gray{BLACK})
+					shares[0].Set(x*2+1, y, color.Gray{WHITE})
+					shares[1].Set(x*2, y, color.Gray{BLACK})
+					shares[1].Set(x*2+1, y, color.Gray{WHITE})
+				}
+			case BLACK:
+				fmt.Println("black!")
+				if randValue > 0.5 {
+					shares[0].Set(x*2, y, color.Gray{WHITE})
+					shares[0].Set(x*2+1, y, color.Gray{BLACK})
+					shares[1].Set(x*2, y, color.Gray{BLACK})
+					shares[1].Set(x*2+1, y, color.Gray{WHITE})
+				} else {
+					shares[0].Set(x*2, y, color.Gray{BLACK})
+					shares[0].Set(x*2+1, y, color.Gray{WHITE})
+					shares[1].Set(x*2, y, color.Gray{WHITE})
+					shares[1].Set(x*2+1, y, color.Gray{BLACK})
+				}
+			}
+		}
+	}
+
+	fmt.Println(shares[0])
+	fmt.Println(shares[1])
+
+	return shares
+}
 
 func (v *VisEnc) Print() {
+	fmt.Printf("w,h (x,y): %d, %d\n", v.InputImageDimX, v.InputImageDimY)
+
 	var blacks, whites int
 
 	for x := 0; x < v.InputImageDimX; x++ {
