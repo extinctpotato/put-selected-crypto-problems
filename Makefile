@@ -1,7 +1,7 @@
 BIN_DIR = ./bin/
 CMD_DIR = ./cmd/
 
-PROGS = lsbstegenc lsbstegdec visenc
+PROGS = lsbstegenc lsbstegdec visenc visdec
 LIST = $(addprefix $(BIN_DIR), $(PROGS))
 
 .PHONY: clean

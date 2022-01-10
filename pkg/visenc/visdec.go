@@ -1,10 +1,24 @@
 package visenc
 
-import "image"
+import (
+	"fmt"
+	"image"
+	"path/filepath"
+	"strings"
+)
 
 type VisDec struct {
 	Shares []image.Image
 }
 
-//func (v *VisDec) LoadFromFile(path string) error {
-//}
+// path is the path to any of the shares
+func (v *VisDec) LoadFromFile(path string) error {
+	splitShareName := strings.Split(
+		strings.TrimSuffix(path, filepath.Ext(path)),
+		".",
+	)
+
+	fmt.Println(splitShareName)
+
+	return nil
+}
