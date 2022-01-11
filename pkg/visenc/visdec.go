@@ -11,7 +11,9 @@ import (
 )
 
 type VisDec struct {
-	Shares []image.Image
+	Shares         []image.Image
+	ShareImageDimX int
+	ShareImageDimY int
 }
 
 // path is the path to any of the shares
@@ -47,10 +49,35 @@ func (v *VisDec) LoadFromFile(path string) error {
 			return err
 		}
 
+		bounds := shareImage.Bounds()
+
+		if v.ShareImageDimX == 0 {
+			v.ShareImageDimX = bounds.Max.X
+		} else if v.ShareImageDimX != 0 && v.ShareImageDimX != bounds.Max.X {
+			return fmt.Errorf("x dim %s should be %d for %d",
+				v.ShareImageDimX, bounds.Max.X, i,
+			)
+		}
+
+		if v.ShareImageDimY == 0 {
+			v.ShareImageDimY = bounds.Max.Y
+		} else if v.ShareImageDimY != 0 && v.ShareImageDimY != bounds.Max.Y {
+			return fmt.Errorf("x dim %s should be %d for %d",
+				v.ShareImageDimX, bounds.Max.Y, i,
+			)
+		}
+
 		v.Shares[i-1] = shareImage
 	}
 
-	fmt.Println(splitShareName)
+	// TODO: add the following checks:
+	//  - check if dimensions of both shares are the same
+	//  - check if only B/W values present
+	//  - check if format is greyscale
 
+	return nil
+}
+
+func (v *VisEnc) Decode() error {
 	return nil
 }
