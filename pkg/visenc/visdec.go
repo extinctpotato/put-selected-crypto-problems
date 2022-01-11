@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -71,13 +73,52 @@ func (v *VisDec) LoadFromFile(path string) error {
 	}
 
 	// TODO: add the following checks:
-	//  - check if dimensions of both shares are the same
 	//  - check if only B/W values present
 	//  - check if format is greyscale
 
 	return nil
 }
 
-func (v *VisEnc) Decode() error {
-	return nil
+func (v *VisDec) Decode() (*image.Gray, error) {
+	inputImageDimX, inputImageDimY := v.ShareImageDimX/2, v.ShareImageDimY
+
+	inputImage := image.NewGray(image.Rectangle{
+		image.Point{0, 0},
+		image.Point{inputImageDimX, inputImageDimY},
+	})
+
+	whiteComb := [][]uint8{
+		{BLACK, WHITE, BLACK, WHITE},
+		{WHITE, BLACK, WHITE, BLACK},
+	}
+
+	blackComb := [][]uint8{
+		{BLACK, WHITE, WHITE, BLACK},
+		{WHITE, BLACK, BLACK, WHITE},
+	}
+
+	for x := 0; x < inputImageDimX; x++ {
+		for y := 0; y < inputImageDimY; y++ {
+			shareColors := []uint8{
+				v.Shares[0].At(x*2, y).(color.Gray).Y,
+				v.Shares[0].At(x*2+1, y).(color.Gray).Y,
+				v.Shares[1].At(x*2, y).(color.Gray).Y,
+				v.Shares[1].At(x*2+1, y).(color.Gray).Y,
+			}
+
+			for _, combVal := range whiteComb {
+				if reflect.DeepEqual(combVal, shareColors) {
+					inputImage.Set(x, y, color.Gray{WHITE})
+				}
+			}
+
+			for _, combVal := range blackComb {
+				if reflect.DeepEqual(combVal, shareColors) {
+					inputImage.Set(x, y, color.Gray{BLACK})
+				}
+			}
+		}
+	}
+
+	return inputImage, nil
 }
