@@ -34,7 +34,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	v.Print()
 	shares := v.Encode()
 
 	// Get basename, e.g. "misc/small_binary.png" gives "misc/small_binary"

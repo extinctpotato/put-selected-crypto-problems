@@ -72,10 +72,6 @@ func (v *VisEnc) Encode() []*image.Gray {
 		image.NewGray(shareImageBoundaries),
 	}
 
-	_ = shares
-
-	fmt.Println("shareImageBoundaries:", shareImageBoundaries)
-
 	for x := 0; x < v.InputImageDimX; x++ {
 		for y := 0; y < v.InputImageDimY; y++ {
 			colorValue := v.InputImage.At(x, y).(color.Gray)
@@ -83,11 +79,8 @@ func (v *VisEnc) Encode() []*image.Gray {
 
 			randValue := rand.Float64()
 
-			fmt.Printf("randValue: %f\n", randValue)
-
 			switch colorValue.Y {
 			case WHITE:
-				fmt.Println("white!")
 				if randValue > 0.5 {
 					shares[0].Set(x*2, y, color.Gray{WHITE})
 					shares[0].Set(x*2+1, y, color.Gray{BLACK})
@@ -100,7 +93,6 @@ func (v *VisEnc) Encode() []*image.Gray {
 					shares[1].Set(x*2+1, y, color.Gray{WHITE})
 				}
 			case BLACK:
-				fmt.Println("black!")
 				if randValue > 0.5 {
 					shares[0].Set(x*2, y, color.Gray{WHITE})
 					shares[0].Set(x*2+1, y, color.Gray{BLACK})
@@ -115,9 +107,6 @@ func (v *VisEnc) Encode() []*image.Gray {
 			}
 		}
 	}
-
-	fmt.Println(shares[0])
-	fmt.Println(shares[1])
 
 	return shares
 }
