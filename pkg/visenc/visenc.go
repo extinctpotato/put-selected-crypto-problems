@@ -75,8 +75,6 @@ func (v *VisEnc) Encode() []*image.Gray {
 	for x := 0; x < v.InputImageDimX; x++ {
 		for y := 0; y < v.InputImageDimY; y++ {
 			colorValue := v.InputImage.At(x, y).(color.Gray)
-			_ = colorValue
-
 			randValue := rand.Float64()
 
 			switch colorValue.Y {
